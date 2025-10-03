@@ -3,14 +3,14 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 
 const DATA_FILE = 'webhooks.json';
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 const app = express();
 app.use(bodyParser.json());
 
 let receivedData = [];
 
-// Load data from file if it exists
+// Load data if file exists
 if (fs.existsSync(DATA_FILE)) {
   try {
     receivedData = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
@@ -19,7 +19,7 @@ if (fs.existsSync(DATA_FILE)) {
   }
 }
 
-// Route to display all received data
+// Display all received webhook data
 app.get('/', (req, res) => {
   res.send(`
     <h1>Received Webhooks</h1>
@@ -27,7 +27,7 @@ app.get('/', (req, res) => {
   `);
 });
 
-// Webhook receiver endpoint
+// Receive webhook POST data
 app.post('/webhook', (req, res) => {
   receivedData.push({
     timestamp: new Date(),
@@ -38,6 +38,7 @@ app.post('/webhook', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server listening on http://localhost:${PORT}`);
+// Listen on all interfaces for Render compatibility
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server listening on http://0.0.0.0:${PORT}`);
 });
