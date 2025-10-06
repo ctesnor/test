@@ -10,7 +10,7 @@ app.use(bodyParser.json());
 
 let receivedData = [];
 
-// Load data if file exists
+// Load any previously saved data
 if (fs.existsSync(DATA_FILE)) {
   try {
     receivedData = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
@@ -19,7 +19,7 @@ if (fs.existsSync(DATA_FILE)) {
   }
 }
 
-// Display all received webhook data
+// Display all raw received webhook data
 app.get('/', (req, res) => {
   res.send(`
     <h1>Received Webhooks</h1>
@@ -27,18 +27,15 @@ app.get('/', (req, res) => {
   `);
 });
 
-// Receive webhook POST data
+// Store raw body exactly as posted
 app.post('/webhook', (req, res) => {
-  receivedData.push({
-    timestamp: new Date(),
-    payload: req.body,
-  });
+  receivedData.push(req.body); // store as-is, no modification/wrapping
 
   fs.writeFileSync(DATA_FILE, JSON.stringify(receivedData, null, 2));
   res.status(200).json({ status: 'ok' });
 });
 
-// Listen on all interfaces for Render compatibility
+// Listen on all interfaces
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server listening on http://0.0.0.0:${PORT}`);
 });
